@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Should I use AI?</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background-color: #EDF0F3;
+      color: #171B20;
+    }
+
+    .container {
+      max-width: 672px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+    }
+
+    /* Typography */
+    h1 {
+      font-family: "Archivo", sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      font-size: 2rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.5rem; }
+    }
+
+    h2 {
+      font-family: "Archivo", sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      font-size: 1.875rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      h2 { font-size: 1.5rem; }
+    }
+
+    .mono {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+    }
+
+    .meta { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #4A535D; }
+    .meta-color { color: #2742F5; }
+
+    /* Cards */
+    .card {
+      background: white;
+      border: 1px solid #D5DBE1;
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 1.5rem; }
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid;
+      border-radius: 0.75rem;
+      font-family: "Archivo", sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      text-align: left;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(0.99); }
+
+    .btn-primary {
+      background: #171B20;
+      color: white;
+      border-color: #171B20;
+    }
+
+    .btn-option {
+      background: white;
+      color: #171B20;
+      border-color: #D5DBE1;
+      margin-bottom: 0.625rem;
+      text-align: left;
+    }
+
+    .btn-option:hover { border-color: #2742F5; background: #E6EAFE; }
+    .btn-option.selected { border-color: #2742F5; background: #E6EAFE; }
+
+    .btn-back {
+      margin-top: 1.25rem;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      text-decoration-offset: 4px;
+      padding: 0;
+      font-size: 0.875rem;
+      color: #4A535D;
+      width: auto;
+    }
+
+    .btn-back:hover { color: #171B20; }
+
+    /* Progress bar */
+    .progress-container {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 9999px;
+      background: #D5DBE1;
+      transition: background 0.2s;
+    }
+
+    .progress-bar.done { background: #2742F5; }
+    .progress-bar.active { background: #171B20; }
+
+    /* Hidden by default */
+    .hidden { display: none; }
+
+    /* Header */
+    header { margin-bottom: 1.5rem; }
+
+    /* Sections */
+    section { margin-bottom: 1.5rem; }
+
+    /* Stamp animation */
+    @keyframes stampIn {
+      0% { transform: rotate(-6deg) scale(1.6); opacity: 0; }
+      100% { transform: rotate(-6deg) scale(1); opacity: 1; }
+    }
+
+    .stamp {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: 3px solid;
+      margin-bottom: 1.25rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.15em;
+      transform: rotate(-6deg);
+      animation: stampIn 0.35s ease-out;
+    }
+
+    /* Verdict styles */
+    .verdict-good { color: #1E7A4C; background: #E3F2E9; }
+    .verdict-conditional { color: #A36300; background: #FBF0DC; }
+    .verdict-notfit { color: #B33A2E; background: #F9E7E4; }
+
+    .verdict-text { font-family: 'Courier New', monospace; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.25rem; margin-top: 1rem; }
+
+    /* Boxes */
+    .watchout-box {
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #FBF0DC;
+      border: 1px solid rgba(163, 99, 0, 0.2);
+    }
+
+    .watchout-item {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .watchout-item:last-child { margin-bottom: 0; }
+
+    .watchout-icon { color: #A36300; flex-shrink: 0; }
+
+    .alternatives-box {
+      border-radius: 0.75rem;
+      padding: 1rem;
+      background: #EDF0F3;
+    }
+
+    .alt-item {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .alt-item:last-child { margin-bottom: 0; }
+
+    .alt-icon { color: #2742F5; flex-shrink: 0; }
+
+    .recap-box {
+      border-radius: 1rem;
+      padding: 1.25rem;
+      background: white;
+      border: 1px solid #D5DBE1;
+      margin-top: 1rem;
+    }
+
+    .recap-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #EDF0F3;
+      border-radius: 0.5rem;
+      align-items: center;
+    }
+
+    .recap-item:last-child { margin-bottom: 0; }
+
+    .recap-label {
+      color: #4A535D;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .recap-value {
+      color: #171B20;
+      font-weight: 500;
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      color: #4A535D;
+      line-height: 1.6;
+    }
+
+    footer .author { color: #D5DBE1; margin-top: 0.75rem; }
+
+    /* List styles */
+    ul { list-style: none; }
+    li { margin-bottom: 0.5rem; }
+    li:last-child { margin-bottom: 0; }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #4A535D;
+      font-family: 'Courier New', monospace;
+    }
+
+    .list-icon { color: #2742F5; flex-shrink: 0; }
+
+    p { line-height: 1.625; margin-bottom: 1rem; color: #4A535D; }
+    p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="meta"><span class="meta-color">●</span> Decision instrument · 07 checks</div>
+      <h1>Is AI the right tool —<br />and which kind?</h1>
+    </header>
+
+    <!-- PROGRESS (hidden initially) -->
+    <div id="progress" class="progress-container hidden"></div>
+
+    <!-- INTRO SECTION -->
+    <section id="intro">
+      <div class="card">
+        <p>
+          Seven quick checks about one specific task or problem. You'll get a verdict on whether
+          AI fits at all — and if it does, which type of AI to reach for, with the guardrails to
+          put around it.
+        </p>
+        <ul style="margin-bottom: 1.5rem;">
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Whether plain software beats AI for this</span>
+          </li>
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Which AI type matches the task</span>
+          </li>
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Risk flags before you commit</span>
+          </li>
+        </ul>
+        <button class="btn btn-primary" onclick="app.startQuiz()">Start the assessment</button>
+        <p style="margin-top: 0.75rem; text-align: center; color: #4A535D; font-size: 0.75rem;">
+          ~60 seconds · think of one concrete task
+        </p>
+      </div>
+    </section>
+
+    <!-- QUIZ SECTION -->
+    <section id="quiz" class="hidden">
+      <div class="card">
+        <div class="meta" id="qNum">01 / 07 · Label</div>
+        <h2 id="qText">Question text</h2>
+        <div id="options"></div>
+        <button class="btn-back" onclick="app.goBack()">← back</button>
+      </div>
+    </section>
+
+    <!-- RESULT SECTION -->
+    <section id="result" class="hidden">
+      <div class="card">
+        <div id="stamp" class="stamp">VERDICT</div>
+        <div class="verdict-text" id="verdictNote">Note</div>
+        <h2 id="approach">Approach</h2>
+        <p id="why">Why text</p>
+        <div id="watchouts"></div>
+        <div class="alternatives-box">
+          <div class="verdict-text" style="color: #4A535D;">Also consider</div>
+          <div id="alternatives"></div>
+        </div>
+      </div>
+
+      <div class="recap-box">
+        <div class="verdict-text" style="color: #4A535D; margin: 0 0 0.75rem 0;">Your inputs</div>
+        <div id="recap"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="app.restart()" style="margin-top: 1rem;">Assess another task</button>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      Rule of thumb: if you can fully specify it, code it. If it needs judgment, consider AI.
+      <div class="author">Made by Dannie Larsen</div>
+    </footer>
+  </div>
+
+  <script>
+    // ============== QUESTIONS ==============
+    const QUESTIONS = [
+      {
+        id: "nature",
+        label: "Task nature",
+        q: "What does the task mainly involve?",
+        options: [
+          { label: "Writing, reading, summarizing, or answering questions", val: "llm" },
+          { label: "Predicting numbers or future outcomes from data", val: "ml" },
+          { label: "Recognizing things in images, video, or audio", val: "perception" },
+          { label: "Sorting items into known categories", val: "classify" },
+          { label: "Repetitive digital steps — copy, paste, move data", val: "rpa" },
+          { label: "Multi-step work across several tools or systems", val: "agent" },
+        ],
+      },
+      {
+        id: "rules",
+        label: "Rule test",
+        q: "Could you write down exact rules that always produce the correct result?",
+        options: [
+          { label: "Yes — the logic is fully definable", val: "full" },
+          { label: "Mostly, but there are fuzzy edge cases", val: "partial" },
+          { label: "No — it needs judgment or interpretation", val: "none" },
+        ],
+      },
+      {
+        id: "volume",
+        label: "Frequency",
+        q: "How often will this task happen?",
+        options: [
+          { label: "Once, or very rarely", val: "once" },
+          { label: "Regularly — weekly or monthly", val: "regular" },
+          { label: "Constantly, at high volume", val: "high" },
+        ],
+      },
+      {
+        id: "stakes",
+        label: "Error cost",
+        q: "What happens if the output is wrong?",
+        options: [
+          { label: "Minor — easy to spot and fix", val: "low" },
+          { label: "Annoying — costs time or money to undo", val: "mid" },
+          { label: "Serious — legal, financial, or safety harm", val: "high" },
+        ],
+      },
+      {
+        id: "data",
+        label: "Data",
+        q: "Do you have examples or historical data for this task?",
+        options: [
+          { label: "Plenty — labeled examples or clean records", val: "rich" },
+          { label: "Some, but messy or unlabeled", val: "some" },
+          { label: "Almost none — it's general knowledge work", val: "none" },
+        ],
+      },
+      {
+        id: "audit",
+        label: "Explainability",
+        q: "Does each output need to be fully explainable or auditable?",
+        options: [
+          { label: "Yes — required by law, policy, or regulators", val: "legal" },
+          { label: "Preferred, but not mandatory", val: "soft" },
+          { label: "No — results matter more than reasoning", val: "no" },
+        ],
+      },
+      {
+        id: "review",
+        label: "Oversight",
+        q: "Will a human check outputs before they're used?",
+        options: [
+          { label: "Always — a person reviews everything", val: "always" },
+          { label: "Spot checks only", val: "sometimes" },
+          { label: "No — it must run fully automatically", val: "never" },
+        ],
+      },
+    ];
+
+    // ============== VERDICT STYLES ==============
+    const VERDICT_STYLE = {
+      "GOOD FIT": { color: "#1E7A4C", bg: "#E3F2E9", note: "AI is the right tool here.", class: "verdict-good" },
+      CONDITIONAL: { color: "#A36300", bg: "#FBF0DC", note: "AI can work — with guardrails.", class: "verdict-conditional" },
+      "NOT A FIT": { color: "#B33A2E", bg: "#F9E7E4", note: "A simpler tool beats AI here.", class: "verdict-notfit" },
+    };
+
+    // ============== RECOMMENDATION ENGINE ==============
+    function buildResult(a) {
+      const watchouts = [];
+      const alternatives = [];
+      let verdict, approach, why;
+
+      const ruleBased = a.rules === "full";
+      const judgment = a.rules === "none";
+
+      // 1. Fully rule-based → not an AI problem
+      if (ruleBased) {
+        verdict = "NOT A FIT";
+        if (a.nature === "rpa") {
+          approach = "RPA or a simple script — not AI";
+          why = "Your task is repetitive and its logic is fully definable. Robotic process automation or a basic script will do this faster, cheaper, and with zero hallucination risk. AI adds unpredictability where you need none.";
+        } else {
+          approach = "Conventional software or automation — not AI";
+          why = "If you can write exact rules that always give the right answer, deterministic code beats AI every time: it's cheaper, testable, auditable, and never makes things up. Save AI for the parts you can't specify.";
+        }
+        alternatives.push("Spreadsheet formulas, scripts, or workflow tools (Zapier, Make, Power Automate)");
+        if (a.volume === "once") watchouts.push("It's a one-off — doing it manually may beat building anything at all.");
+        return { verdict, approach, why, watchouts, alternatives };
+      }
+
+      // 2. One-off task → use a tool, don't build a system
+      const oneOff = a.volume === "once";
+
+      // 3. Map task nature → AI type
+      let type, typeWhy;
+      switch (a.nature) {
+        case "llm":
+          type = "Generative AI — a large language model";
+          typeWhy = "Language understanding and generation is exactly what LLMs are strongest at. No training data needed — good prompting and a few examples go a long way.";
+          break;
+        case "agent":
+          type = "Agentic AI — an LLM connected to your tools";
+          typeWhy = "Multi-step work across systems calls for an agent: an LLM that can read context, decide next steps, and act through tool integrations. Start narrow with one workflow.";
+          break;
+        case "ml":
+          if (a.data === "rich") {
+            type = "Predictive machine learning — regression or forecasting";
+            typeWhy = "Numeric prediction from historical data is classic supervised ML. With clean records, even simple models (gradient boosting, linear models) often perform remarkably well.";
+          } else {
+            type = "Predictive ML — but collect data first";
+            typeWhy = "Forecasting models learn from history. Without solid data, start with simple statistical baselines while you build a clean dataset; an ML model without data is guesswork.";
+            watchouts.push("Data is the bottleneck here, not the algorithm.");
+          }
+          break;
+        case "perception":
+          type = "Computer vision / speech recognition";
+          typeWhy = "Perception tasks — detecting objects, reading documents, transcribing audio — are mature AI territory. Pre-trained models and APIs handle most cases without custom training.";
+          break;
+        case "classify":
+          if (a.data === "rich") {
+            type = "Supervised classification model";
+            typeWhy = "With labeled examples, a trained classifier gives you fast, cheap, consistent categorization — and you can measure its accuracy precisely before trusting it.";
+          } else {
+            type = "LLM-based classification (zero-shot)";
+            typeWhy = "Without labeled data, an LLM can classify from category descriptions alone. Less precise than a trained model, but it works on day one — and you can collect labels as you go.";
+          }
+          break;
+        case "rpa":
+          type = "Agentic AI or AI-assisted automation";
+          typeWhy = "Your steps are repetitive but not fully rule-definable — the fuzzy parts (reading varied documents, judgment calls) are where AI helps, wrapped inside ordinary automation for the rest.";
+          break;
+        default:
+          type = "Generative AI — a large language model";
+          typeWhy = "General judgment and language work suits an LLM assistant.";
+      }
+
+      // 4. Risk posture
+      const highRisk = a.stakes === "high";
+      const noReview = a.review === "never";
+      const auditHard = a.audit === "legal";
+      const blackBox = ["llm", "agent", "perception"].includes(a.nature) || a.data !== "rich";
+
+      if (highRisk && noReview) {
+        verdict = "CONDITIONAL";
+        watchouts.push("High error cost with no human review is the riskiest possible setup. Add a human-in-the-loop step, or limit AI to drafting while a person approves.");
+      } else if (auditHard && blackBox) {
+        verdict = "CONDITIONAL";
+        watchouts.push("Full auditability is hard with black-box models. Consider interpretable models, logging every input/output, or keeping AI advisory-only.");
+      } else {
+        verdict = "GOOD FIT";
+      }
+
+      if (highRisk && !noReview) watchouts.push("Keep the human review step permanent — errors here are expensive.");
+      if (a.review === "sometimes" && a.stakes !== "low") watchouts.push("Spot checks miss systematic errors. Sample more heavily during the first months.");
+      if (judgment && a.audit === "soft") watchouts.push("Ask the AI to show its reasoning so spot-checking stays meaningful.");
+
+      // 5. Build vs use
+      if (oneOff) {
+        approach = type;
+        if (["ml", "agent", "perception"].includes(a.nature)) {
+          why = typeWhy + " Since this is a one-off and the setup is relatively complex, manual handling is usually the better default. Even off-the-shelf AI setup and validation can cost more time than doing it directly once.";
+          alternatives.push("Default to manual execution for this one-off unless the output is reusable for future tasks.");
+        } else {
+          why = typeWhy + " Since this is a one-off, don't build anything — use an existing AI assistant or off-the-shelf tool and move on.";
+          alternatives.push("Doing it manually may still be fastest for a true one-off.");
+        }
+      } else if (a.volume === "high") {
+        approach = type;
+        why = typeWhy + " At this volume, the investment in a proper integrated setup will pay for itself quickly.";
+      } else {
+        approach = type;
+        why = typeWhy + " At regular-but-modest volume, prefer off-the-shelf tools over custom builds.";
+      }
+
+      alternatives.push("Pilot on a small slice first and measure accuracy against a human baseline.");
+      return { verdict, approach, why, watchouts, alternatives };
+    }
+
+    // ============== APP STATE ==============
+    const app = {
+      stage: "intro",
+      step: 0,
+      answers: {},
+
+      startQuiz() {
+        this.stage = "quiz";
+        this.step = 0;
+        this.answers = {};
+        this.render();
+      },
+
+      pick(qid, val) {
+        this.answers[qid] = val;
+        if (this.step + 1 < QUESTIONS.length) {
+          this.step++;
+        } else {
+          this.stage = "result";
+        }
+        this.render();
+      },
+
+      goBack() {
+        if (this.step === 0) {
+          this.stage = "intro";
+        } else {
+          this.step--;
+        }
+        this.render();
+      },
+
+      restart() {
+        this.stage = "intro";
+        this.step = 0;
+        this.answers = {};
+        this.render();
+      },
+
+      render() {
+        // Hide all sections
+        document.getElementById("intro").classList.add("hidden");
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("result").classList.add("hidden");
+        document.getElementById("progress").classList.add("hidden");
+
+        // Show progress if not intro
+        if (this.stage !== "intro") {
+          this.renderProgress();
+        }
+
+        if (this.stage === "intro") {
+          document.getElementById("intro").classList.remove("hidden");
+        } else if (this.stage === "quiz") {
+          document.getElementById("quiz").classList.remove("hidden");
+          this.renderQuiz();
+        } else if (this.stage === "result") {
+          document.getElementById("result").classList.remove("hidden");
+          this.renderResult();
+        }
+      },
+
+      renderProgress() {
+        const container = document.getElementById("progress");
+        container.innerHTML = "";
+        QUESTIONS.forEach((q, i) => {
+          const done = this.answers[q.id] !== undefined && (this.stage === "result" || i < this.step);
+          const active = this.stage === "quiz" && i === this.step;
+          const bar = document.createElement("div");
+          bar.className = "progress-bar";
+          if (done) bar.classList.add("done");
+          if (active) bar.classList.add("active");
+          container.appendChild(bar);
+        });
+        container.classList.remove("hidden");
+      },
+
+      renderQuiz() {
+        const q = QUESTIONS[this.step];
+        document.getElementById("qNum").textContent = String(this.step + 1).padStart(2, "0") + " / 07 · " + q.label;
+        document.getElementById("qText").textContent = q.q;
+
+        const optionsContainer = document.getElementById("options");
+        optionsContainer.innerHTML = "";
+
+        q.options.forEach((option) => {
+          const button = document.createElement("button");
+          button.className = "btn btn-option";
+          if (this.answers[q.id] === option.val) button.classList.add("selected");
+          button.textContent = option.label;
+          button.onclick = () => this.pick(q.id, option.val);
+          optionsContainer.appendChild(button);
+        });
+      },
+
+      renderResult() {
+        const result = buildResult(this.answers);
+        const vs = VERDICT_STYLE[result.verdict];
+
+        // Stamp
+        const stamp = document.getElementById("stamp");
+        stamp.textContent = result.verdict;
+        stamp.className = "stamp " + vs.class;
+        stamp.style.color = vs.color;
+        stamp.style.borderColor = vs.color;
+        stamp.style.background = vs.bg;
+
+        document.getElementById("verdictNote").textContent = vs.note;
+        document.getElementById("verdictNote").style.color = vs.color;
+
+        document.getElementById("approach").textContent = result.approach;
+        document.getElementById("why").textContent = result.why;
+
+        // Watchouts
+        const watchoutsContainer = document.getElementById("watchouts");
+        watchoutsContainer.innerHTML = "";
+        if (result.watchouts.length > 0) {
+          const box = document.createElement("div");
+          box.className = "watchout-box";
+          const label = document.createElement("div");
+          label.className = "verdict-text";
+          label.style.color = "#A36300";
+          label.textContent = "Watch out";
+          box.appendChild(label);
+
+          result.watchouts.forEach((w) => {
+            const item = document.createElement("div");
+            item.className = "watchout-item";
+            item.innerHTML = '<span class="watchout-icon">▲</span><span>' + w + '</span>';
+            box.appendChild(item);
+          });
+
+          watchoutsContainer.appendChild(box);
+        }
+
+        // Alternatives
+        const altContainer = document.getElementById("alternatives");
+        altContainer.innerHTML = "";
+        result.alternatives.forEach((alt) => {
+          const item = document.createElement("div");
+          item.className = "alt-item";
+          item.innerHTML = '<span class="alt-icon">→</span><span>' + alt + '</span>';
+          altContainer.appendChild(item);
+        });
+
+        // Recap
+        const recapContainer = document.getElementById("recap");
+        recapContainer.innerHTML = "";
+        QUESTIONS.forEach((q) => {
+          const opt = q.options.find((o) => o.val === this.answers[q.id]);
+          const item = document.createElement("div");
+          item.className = "recap-item";
+          item.innerHTML = '<span class="recap-label">' + q.label + '</span><span class="recap-value">' + (opt ? opt.label : "—") + '</span>';
+          recapContainer.appendChild(item);
+        });
+      },
+    };
+
+    // Initialize
+    app.render();
+  </script>
+</body>
+</html>

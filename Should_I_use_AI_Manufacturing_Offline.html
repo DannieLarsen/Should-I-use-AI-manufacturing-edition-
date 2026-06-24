@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Should I use AI? — Manufacturing Edition</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background-color: #F0F2F5;
+      color: #171B20;
+    }
+
+    .container {
+      max-width: 672px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+    }
+
+    /* Typography */
+    h1 {
+      font-family: "Archivo", sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      font-size: 2rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.5rem; }
+    }
+
+    h2 {
+      font-family: "Archivo", sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      font-size: 1.875rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      h2 { font-size: 1.5rem; }
+    }
+
+    .mono {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+    }
+
+    .meta { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #4A535D; }
+    .meta-color { color: #1B4FD8; }
+
+    /* Cards */
+    .card {
+      background: white;
+      border: 1px solid #D5DBE1;
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 1.5rem; }
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid;
+      border-radius: 0.75rem;
+      font-family: "Archivo", sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      text-align: left;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(0.99); }
+
+    .btn-primary {
+      background: #171B20;
+      color: white;
+      border-color: #171B20;
+    }
+
+    .btn-option {
+      background: white;
+      color: #171B20;
+      border-color: #D5DBE1;
+      margin-bottom: 0.625rem;
+      text-align: left;
+    }
+
+    .btn-option:hover { border-color: #1B4FD8; background: #E1E9FC; }
+    .btn-option.selected { border-color: #1B4FD8; background: #E1E9FC; }
+
+    .btn-back {
+      margin-top: 1.25rem;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      text-decoration-offset: 4px;
+      padding: 0;
+      font-size: 0.875rem;
+      color: #4A535D;
+      width: auto;
+    }
+
+    .btn-back:hover { color: #171B20; }
+
+    /* Progress bar */
+    .progress-container {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 9999px;
+      background: #D5DBE1;
+      transition: background 0.2s;
+    }
+
+    .progress-bar.done { background: #1B4FD8; }
+    .progress-bar.active { background: #171B20; }
+
+    /* Hidden by default */
+    .hidden { display: none; }
+
+    /* Header */
+    header { margin-bottom: 1.5rem; }
+
+    /* Sections */
+    section { margin-bottom: 1.5rem; }
+
+    /* Stamp animation */
+    @keyframes stampIn {
+      0% { transform: rotate(-6deg) scale(1.6); opacity: 0; }
+      100% { transform: rotate(-6deg) scale(1); opacity: 1; }
+    }
+
+    .stamp {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: 3px solid;
+      margin-bottom: 1.25rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.15em;
+      transform: rotate(-6deg);
+      animation: stampIn 0.35s ease-out;
+    }
+
+    /* Verdict styles */
+    .verdict-good { color: #1E7A4C; background: #E3F2E9; }
+    .verdict-conditional { color: #A36300; background: #FBF0DC; }
+    .verdict-notfit { color: #B33A2E; background: #F9E7E4; }
+
+    .verdict-text { font-family: 'Courier New', monospace; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.25rem; margin-top: 1rem; }
+
+    /* Boxes */
+    .watchout-box {
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #FBF0DC;
+      border: 1px solid rgba(163, 99, 0, 0.2);
+    }
+
+    .watchout-item {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .watchout-item:last-child { margin-bottom: 0; }
+
+    .watchout-icon { color: #A36300; flex-shrink: 0; }
+
+    .alternatives-box {
+      border-radius: 0.75rem;
+      padding: 1rem;
+      background: #F0F2F5;
+    }
+
+    .alt-item {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .alt-item:last-child { margin-bottom: 0; }
+
+    .alt-icon { color: #1B4FD8; flex-shrink: 0; }
+
+    .recap-box {
+      border-radius: 1rem;
+      padding: 1.25rem;
+      background: white;
+      border: 1px solid #D5DBE1;
+      margin-top: 1rem;
+    }
+
+    .recap-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #F0F2F5;
+      border-radius: 0.5rem;
+      align-items: center;
+    }
+
+    .recap-item:last-child { margin-bottom: 0; }
+
+    .recap-label {
+      color: #4A535D;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .recap-value {
+      color: #171B20;
+      font-weight: 500;
+      text-align: right;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      color: #4A535D;
+      line-height: 1.6;
+    }
+
+    footer .author { color: #D5DBE1; margin-top: 0.75rem; }
+
+    /* List styles */
+    ul { list-style: none; }
+    li { margin-bottom: 0.5rem; }
+    li:last-child { margin-bottom: 0; }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #4A535D;
+      font-family: 'Courier New', monospace;
+    }
+
+    .list-icon { color: #1B4FD8; flex-shrink: 0; }
+
+    p { line-height: 1.625; margin-bottom: 1rem; color: #4A535D; }
+    p:last-child { margin-bottom: 0; }
+
+    .info-box {
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.75rem;
+      background: #E1E9FC;
+      border: 1px solid rgba(27, 79, 216, 0.2);
+      color: #1B4FD8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="meta"><span class="meta-color">▣</span> Manufacturing AI Decision Tool · 07 checks</div>
+      <h1>Is AI the right call —<br />for this production use-case?</h1>
+    </header>
+
+    <!-- PROGRESS (hidden initially) -->
+    <div id="progress" class="progress-container hidden"></div>
+
+    <!-- INTRO SECTION -->
+    <section id="intro">
+      <div class="card">
+        <p>
+          Seven questions about one specific manufacturing or production task. You'll get a
+          recommendation on whether AI fits, which type to use, and the safety, data, and
+          integration guardrails to put in place first.
+        </p>
+        <ul style="margin-bottom: 1.5rem;">
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Whether standard automation beats AI for this task</span>
+          </li>
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Which AI type matches the manufacturing context</span>
+          </li>
+          <li class="list-item">
+            <span class="list-icon">→</span>
+            <span>Safety, traceability, and OT/IT integration flags</span>
+          </li>
+        </ul>
+        <div class="info-box">
+          Think of one concrete task on your production floor, maintenance workflow, or quality process.
+        </div>
+        <button class="btn btn-primary" onclick="app.startQuiz()">Start the assessment</button>
+        <p style="margin-top: 0.75rem; text-align: center; color: #4A535D; font-size: 0.75rem;">
+          ~90 seconds · results include implementation guardrails
+        </p>
+      </div>
+    </section>
+
+    <!-- QUIZ SECTION -->
+    <section id="quiz" class="hidden">
+      <div class="card">
+        <div class="meta" id="qNum">01 / 07 · Label</div>
+        <h2 id="qText">Question text</h2>
+        <div id="options"></div>
+        <button class="btn-back" onclick="app.goBack()">← back</button>
+      </div>
+    </section>
+
+    <!-- RESULT SECTION -->
+    <section id="result" class="hidden">
+      <div class="card">
+        <div id="stamp" class="stamp">VERDICT</div>
+        <div class="verdict-text" id="verdictNote">Note</div>
+        <h2 id="approach">Approach</h2>
+        <p id="why">Why text</p>
+        <div id="watchouts"></div>
+        <div class="alternatives-box">
+          <div class="verdict-text" style="color: #4A535D;">Recommended next steps</div>
+          <div id="alternatives"></div>
+        </div>
+      </div>
+
+      <div class="recap-box">
+        <div class="verdict-text" style="color: #4A535D; margin: 0 0 0.75rem 0;">Your inputs</div>
+        <div id="recap"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="app.restart()" style="margin-top: 1rem;">Assess another use-case</button>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      Rule of thumb: if it can be specified, automate it. If it needs pattern recognition or judgment, consider AI — with safety first.
+      <div class="author">Made by Dannie Larsen</div>
+    </footer>
+  </div>
+
+  <script>
+    // ============== QUESTIONS ==============
+    const QUESTIONS = [
+      {
+        id: "usecase",
+        label: "Use-case type",
+        q: "Which manufacturing challenge best describes your task?",
+        options: [
+          { label: "Detecting defects, anomalies, or quality issues on the line", val: "quality" },
+          { label: "Predicting equipment failure or scheduling maintenance", val: "predictive" },
+          { label: "Optimising process parameters, yield, or energy use", val: "optimise" },
+          { label: "Reading documents — work orders, manuals, inspection reports", val: "docs" },
+          { label: "Automating repetitive data entry or system handoffs (MES, ERP, SCADA)", val: "rpa" },
+          { label: "Routing, scheduling, or planning production sequences", val: "planning" },
+          { label: "Supporting operators or technicians with guidance or troubleshooting", val: "assist" },
+        ],
+      },
+      {
+        id: "rules",
+        label: "Specification",
+        q: "Can the acceptance criteria be fully written down as deterministic rules?",
+        options: [
+          { label: "Yes — tolerances, thresholds, and logic are fully defined", val: "full" },
+          { label: "Mostly, but some cases need human judgment", val: "partial" },
+          { label: "No — it relies on pattern recognition or expert intuition", val: "none" },
+        ],
+      },
+      {
+        id: "data",
+        label: "Sensor & historian data",
+        q: "What production data do you have available?",
+        options: [
+          { label: "Rich — time-series, sensor logs, or labeled images at scale", val: "rich" },
+          { label: "Some — partial records, inconsistent labeling, or short history", val: "some" },
+          { label: "Little — new process, no historian, or data locked in silos", val: "none" },
+        ],
+      },
+      {
+        id: "realtime",
+        label: "Latency requirement",
+        q: "How fast must the AI respond to be useful?",
+        options: [
+          { label: "Real-time / near real-time — milliseconds to seconds (in-line inspection, control loops)", val: "rt" },
+          { label: "Minutes to hours — batch analysis, shift reports, maintenance scheduling", val: "batch" },
+          { label: "Days or longer — strategic planning, forecasting, knowledge work", val: "async" },
+        ],
+      },
+      {
+        id: "safety",
+        label: "Safety classification",
+        q: "What are the consequences of an AI error in this context?",
+        options: [
+          { label: "Safety-critical — risk of injury, hazardous release, or equipment damage", val: "critical" },
+          { label: "Quality / cost impact — scrap, rework, or customer complaints", val: "quality" },
+          { label: "Efficiency only — minor delays or extra manual effort", val: "minor" },
+        ],
+      },
+      {
+        id: "audit",
+        label: "Traceability",
+        q: "Is a full audit trail of AI decisions required?",
+        options: [
+          { label: "Yes — ISO, FDA, CE, or internal quality system mandates it", val: "mandatory" },
+          { label: "Preferred for process improvement, but not mandated", val: "soft" },
+          { label: "No — throughput or insight matters more than explainability", val: "no" },
+        ],
+      },
+      {
+        id: "integration",
+        label: "IT / OT integration",
+        q: "How connected is your target environment?",
+        options: [
+          { label: "Well-connected — OPC-UA, MQTT, REST APIs, or cloud historian in place", val: "connected" },
+          { label: "Partially — some digital interfaces but significant manual steps remain", val: "partial" },
+          { label: "Air-gapped or legacy — PLC-only, paper-based, or no network access", val: "airgap" },
+        ],
+      },
+    ];
+
+    // ============== VERDICT STYLES ==============
+    const VERDICT_STYLE = {
+      "GOOD FIT": { color: "#1E7A4C", bg: "#E3F2E9", note: "AI is the right tool here.", class: "verdict-good" },
+      CONDITIONAL: { color: "#A36300", bg: "#FBF0DC", note: "AI can work — with guardrails.", class: "verdict-conditional" },
+      "NOT A FIT": { color: "#B33A2E", bg: "#F9E7E4", note: "A simpler tool beats AI here.", class: "verdict-notfit" },
+    };
+
+    // ============== RECOMMENDATION ENGINE ==============
+    function buildResult(a) {
+      const watchouts = [];
+      const alternatives = [];
+      let verdict, approach, why;
+
+      // 1. Fully rule-based → use PLCs / SPC, not AI
+      if (a.rules === "full") {
+        verdict = "NOT A FIT";
+        if (a.usecase === "rpa") {
+          approach = "Standard automation or RPA — not AI";
+          why = "Your task has fully specified logic. A PLC sequence, a robot program, or an RPA bot will execute it faster, more reliably, and with complete traceability. AI adds stochastic risk where determinism is what you need.";
+        } else {
+          approach = "SPC, rule-based MES logic, or conventional control — not AI";
+          why = "If you can write the decision rules completely, deterministic software wins every time on the shop floor: it's cheaper, auditable, certifiable, and never hallucinates. Keep AI for the judgment calls that rules can't capture.";
+        }
+        alternatives.push("Statistical Process Control (SPC) charts and control limits");
+        alternatives.push("PLC ladder logic or IEC 61131 function blocks");
+        alternatives.push("MES / ERP rule engines and workflow automation");
+        if (a.data === "none") watchouts.push("You also lack data — invest in instrumentation before revisiting AI.");
+        return { verdict, approach, why, watchouts, alternatives };
+      }
+
+      // 2. Map use-case to AI type
+      let type, typeWhy;
+      switch (a.usecase) {
+        case "quality":
+          if (a.data === "rich") {
+            type = "Computer vision — trained defect detection model";
+            typeWhy = "Inline visual inspection is one of manufacturing AI's most mature applications. With sufficient labeled images, a CNN or vision transformer can match or exceed human inspector consistency, 24 / 7.";
+          } else {
+            type = "Computer vision — start with anomaly detection (unsupervised)";
+            typeWhy = "Without labeled defect images, train on 'good' parts only and flag statistical anomalies. Collect labels from operator feedback to build toward a supervised model over time.";
+            watchouts.push("Anomaly detection has higher false-positive rates early on — plan for operator confirmation loops.");
+          }
+          break;
+
+        case "predictive":
+          if (a.data === "rich") {
+            type = "Predictive maintenance — supervised or hybrid ML model";
+            typeWhy = "With rich sensor history and past failure records, supervised ML (gradient boosting, LSTM) can predict remaining useful life and surface early warning signatures. This is proven at scale across rotating equipment.";
+          } else {
+            type = "Condition monitoring — physics-based + statistical baseline";
+            typeWhy = "Without failure history, start with vibration / temperature envelope monitoring and statistical baselines. Use AI to flag deviations while you build the failure dataset needed for predictive models.";
+            watchouts.push("A predictive model without failure examples predicts nothing useful — instrument first, model later.");
+          }
+          break;
+
+        case "optimise":
+          type = "Process optimisation — reinforcement learning or Bayesian optimisation";
+          typeWhy = "Yield, energy, and cycle-time optimisation can deliver large gains through AI-driven parameter tuning. Start with Bayesian optimisation (faster convergence, less data) before attempting reinforcement learning.";
+          watchouts.push("Never let the AI write setpoints directly to control systems without a human approval step in the first phase.");
+          if (a.data === "none") watchouts.push("Optimisation AI needs process history — run a data collection campaign first.");
+          break;
+
+        case "docs":
+          type = "Generative AI — retrieval-augmented LLM over your document corpus";
+          typeWhy = "Extracting structured information from work orders, SOPs, and inspection reports, or answering technician questions from manuals, is a strong LLM use-case. RAG (retrieval-augmented generation) keeps answers grounded in your actual documents.";
+          watchouts.push("LLMs can misread numbers, tolerances, or part numbers — always show the source document alongside the answer.");
+          break;
+
+        case "rpa":
+          type = "AI-assisted automation — intelligent document processing + RPA";
+          typeWhy = "Where data entry involves variable formats (PDFs, handwritten forms, mixed layouts), AI extraction paired with an RPA bot handles the variability that pure rule-based automation cannot.";
+          break;
+
+        case "planning":
+          if (a.data === "rich") {
+            type = "ML-based scheduling / digital twin simulation";
+            typeWhy = "Production scheduling with many constraints benefits from ML-learned heuristics or simulation-based optimisation. These can outperform manual planners on on-time delivery and WIP reduction.";
+          } else {
+            type = "Constraint-based solver or advanced planning tool — not yet AI";
+            typeWhy = "Without historical order and performance data, classical constraint solvers (CP-SAT, OR-Tools) outperform data-hungry ML models and are fully explainable. Build the data foundation first.";
+            alternatives.push("OR-Tools, CPLEX, or your ERP's built-in APS module");
+          }
+          break;
+
+        case "assist":
+          type = "LLM-powered operator / technician assistant";
+          typeWhy = "Conversational AI grounded in your equipment manuals, P&IDs, and maintenance logs can significantly cut troubleshooting time and reduce dependence on senior expert availability. Deploy with a human-in-the-loop escalation path.";
+          watchouts.push("Ground all answers in verified technical documentation — never let the model speculate about safety procedures.");
+          break;
+
+        default:
+          type = "Generative AI or supervised ML";
+          typeWhy = "The task involves pattern recognition or judgment that exceeds simple rule coverage.";
+      }
+
+      // 3. Safety & oversight posture
+      const safetyCritical = a.safety === "critical";
+      const auditMandatory = a.audit === "mandatory";
+
+      if (safetyCritical) {
+        verdict = "CONDITIONAL";
+        watchouts.push("Safety-critical applications require IEC 61508 / ISO 13849 functional safety assessment. AI must act as advisory-only or be confined to a safety-rated envelope until certified.");
+        watchouts.push("Define a hard fallback: the existing control system must take over automatically if the AI fails or goes out of confidence bounds.");
+      } else if (auditMandatory && ["quality", "docs", "assist"].includes(a.usecase)) {
+        verdict = "CONDITIONAL";
+        watchouts.push("Your quality system requires full traceability. Log every AI input, output, model version, and confidence score. Integrate with your LIMS or MES for batch records.");
+      } else {
+        verdict = "GOOD FIT";
+      }
+
+      // 4. Integration / connectivity caveats
+      if (a.integration === "airgap") {
+        watchouts.push("Air-gapped or legacy environments require edge deployment. Choose models that run on industrial edge hardware (e.g. NVIDIA Jetson, Siemens Industrial Edge) — cloud APIs are not an option here.");
+        watchouts.push("Edge deployment usually increases implementation cost and timeline versus cloud APIs due to hardware procurement, on-site maintenance, and constrained model rollout/update workflows.");
+        if (verdict === "GOOD FIT") verdict = "CONDITIONAL";
+      }
+      if (a.integration === "partial") {
+        watchouts.push("Partial connectivity means manual data pipelines will bottleneck value. Budget time for OT/IT integration alongside the AI work.");
+      }
+
+      // 5. Latency warnings
+      if (a.realtime === "rt" && !["quality", "optimise"].includes(a.usecase)) {
+        watchouts.push("Real-time latency on the shop floor is demanding — validate inference speed on target hardware early, not after training.");
+      }
+
+      // 6. Data gaps
+      if (a.data === "none" && verdict === "GOOD FIT") {
+        verdict = "CONDITIONAL";
+        watchouts.push("No usable data yet. Run a 4–8 week instrumentation sprint to collect baselines before committing to an AI model.");
+      }
+
+      // 7. Build vs pilot
+      if (a.data === "rich" && a.integration === "connected") {
+        approach = type;
+        why = typeWhy + " Your data and connectivity position you well for a structured proof-of-concept. Define a success metric, run a 6–12 week pilot on one line, and measure before scaling.";
+      } else {
+        approach = type;
+        why = typeWhy + " Address the data or integration gaps in parallel with a small pilot to de-risk the investment before full deployment.";
+      }
+
+      alternatives.push("Run a 4-week data audit before any vendor or model selection.");
+      alternatives.push("Start with one machine or one production line — prove ROI before scaling.");
+      if (a.usecase !== "rpa") alternatives.push("Keep the existing manual or rule-based process running in parallel until the AI reaches target accuracy.");
+
+      return { verdict, approach, why, watchouts, alternatives };
+    }
+
+    // ============== APP STATE ==============
+    const app = {
+      stage: "intro",
+      step: 0,
+      answers: {},
+
+      startQuiz() {
+        this.stage = "quiz";
+        this.step = 0;
+        this.answers = {};
+        this.render();
+      },
+
+      pick(qid, val) {
+        this.answers[qid] = val;
+        if (this.step + 1 < QUESTIONS.length) {
+          this.step++;
+        } else {
+          this.stage = "result";
+        }
+        this.render();
+      },
+
+      goBack() {
+        if (this.step === 0) {
+          this.stage = "intro";
+        } else {
+          this.step--;
+        }
+        this.render();
+      },
+
+      restart() {
+        this.stage = "intro";
+        this.step = 0;
+        this.answers = {};
+        this.render();
+      },
+
+      render() {
+        // Hide all sections
+        document.getElementById("intro").classList.add("hidden");
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("result").classList.add("hidden");
+        document.getElementById("progress").classList.add("hidden");
+
+        // Show progress if not intro
+        if (this.stage !== "intro") {
+          this.renderProgress();
+        }
+
+        if (this.stage === "intro") {
+          document.getElementById("intro").classList.remove("hidden");
+        } else if (this.stage === "quiz") {
+          document.getElementById("quiz").classList.remove("hidden");
+          this.renderQuiz();
+        } else if (this.stage === "result") {
+          document.getElementById("result").classList.remove("hidden");
+          this.renderResult();
+        }
+      },
+
+      renderProgress() {
+        const container = document.getElementById("progress");
+        container.innerHTML = "";
+        QUESTIONS.forEach((q, i) => {
+          const done = this.answers[q.id] !== undefined && (this.stage === "result" || i < this.step);
+          const active = this.stage === "quiz" && i === this.step;
+          const bar = document.createElement("div");
+          bar.className = "progress-bar";
+          if (done) bar.classList.add("done");
+          if (active) bar.classList.add("active");
+          container.appendChild(bar);
+        });
+        container.classList.remove("hidden");
+      },
+
+      renderQuiz() {
+        const q = QUESTIONS[this.step];
+        document.getElementById("qNum").textContent = String(this.step + 1).padStart(2, "0") + " / 07 · " + q.label;
+        document.getElementById("qText").textContent = q.q;
+
+        const optionsContainer = document.getElementById("options");
+        optionsContainer.innerHTML = "";
+
+        q.options.forEach((option) => {
+          const button = document.createElement("button");
+          button.className = "btn btn-option";
+          if (this.answers[q.id] === option.val) button.classList.add("selected");
+          button.textContent = option.label;
+          button.onclick = () => this.pick(q.id, option.val);
+          optionsContainer.appendChild(button);
+        });
+      },
+
+      renderResult() {
+        const result = buildResult(this.answers);
+        const vs = VERDICT_STYLE[result.verdict];
+
+        // Stamp
+        const stamp = document.getElementById("stamp");
+        stamp.textContent = result.verdict;
+        stamp.className = "stamp " + vs.class;
+        stamp.style.color = vs.color;
+        stamp.style.borderColor = vs.color;
+        stamp.style.background = vs.bg;
+
+        document.getElementById("verdictNote").textContent = vs.note;
+        document.getElementById("verdictNote").style.color = vs.color;
+
+        document.getElementById("approach").textContent = result.approach;
+        document.getElementById("why").textContent = result.why;
+
+        // Watchouts
+        const watchoutsContainer = document.getElementById("watchouts");
+        watchoutsContainer.innerHTML = "";
+        if (result.watchouts.length > 0) {
+          const box = document.createElement("div");
+          box.className = "watchout-box";
+          const label = document.createElement("div");
+          label.className = "verdict-text";
+          label.style.color = "#A36300";
+          label.textContent = "Before you proceed";
+          box.appendChild(label);
+
+          result.watchouts.forEach((w) => {
+            const item = document.createElement("div");
+            item.className = "watchout-item";
+            item.innerHTML = '<span class="watchout-icon">▲</span><span>' + w + '</span>';
+            box.appendChild(item);
+          });
+
+          watchoutsContainer.appendChild(box);
+        }
+
+        // Alternatives
+        const altContainer = document.getElementById("alternatives");
+        altContainer.innerHTML = "";
+        result.alternatives.forEach((alt) => {
+          const item = document.createElement("div");
+          item.className = "alt-item";
+          item.innerHTML = '<span class="alt-icon">→</span><span>' + alt + '</span>';
+          altContainer.appendChild(item);
+        });
+
+        // Recap
+        const recapContainer = document.getElementById("recap");
+        recapContainer.innerHTML = "";
+        QUESTIONS.forEach((q) => {
+          const opt = q.options.find((o) => o.val === this.answers[q.id]);
+          const item = document.createElement("div");
+          item.className = "recap-item";
+          item.innerHTML = '<span class="recap-label">' + q.label + '</span><span class="recap-value">' + (opt ? opt.label : "—") + '</span>';
+          recapContainer.appendChild(item);
+        });
+      },
+    };
+
+    // Initialize
+    app.render();
+  </script>
+</body>
+</html>
